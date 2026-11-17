@@ -1,4 +1,4 @@
-package com.mousetabswitcherplus;
+package com.mousetabswitcherextended;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;

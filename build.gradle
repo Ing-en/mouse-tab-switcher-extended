@@ -28,7 +28,7 @@ dependencies {
 	testImplementation group: 'net.runelite', name: 'jshell', version: runeLiteVersion
 }
 
-group = 'com.mousetabswitcherplus'
+group = 'com.mousetabswitcherextended'
 version = '1.0.0'
 
 tasks.withType(JavaCompile).configureEach {
@@ -38,9 +38,9 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks.register('run', JavaExec) {
 	group = 'application'
-	description = 'Launches RuneLite with Mouse Tab Switcher Plus loaded'
+	description = 'Launches RuneLite with Mouse Tab Switcher Extended loaded'
 	classpath = sourceSets.test.runtimeClasspath
-	mainClass = 'com.mousetabswitcherplus.MouseTabSwitcherPlusPluginTest'
+	mainClass = 'com.mousetabswitcherextended.MouseTabSwitcherExtendedPluginTest'
 	// ExternalPluginManager.loadBuiltin refuses to run without assertions enabled.
 	jvmArgs = ['-ea']
 	args = ['--debug', '--developer-mode']

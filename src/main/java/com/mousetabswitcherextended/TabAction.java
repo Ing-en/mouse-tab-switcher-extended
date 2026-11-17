@@ -1,4 +1,4 @@
-package com.mousetabswitcherplus;
+package com.mousetabswitcherextended;
 
 import lombok.Getter;
 

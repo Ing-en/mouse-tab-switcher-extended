@@ -1,4 +1,4 @@
-package com.mousetabswitcherplus;
+package com.mousetabswitcherextended;
 
 import com.google.inject.Provides;
 import java.awt.Rectangle;
@@ -11,27 +11,35 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
+import javax.swing.SwingUtilities;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.gameval.VarClientID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.chat.ChatMessageManager;
+import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.PluginChanged;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.input.MouseAdapter;
 import net.runelite.client.input.MouseManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.PluginInstantiationException;
+import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.util.HotkeyListener;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Mouse Tab Switcher Plus",
-	description = "Switch interface tabs with any mouse button, or step to the next/previous tab",
+	name = "Mouse Tab Switcher Extended",
+	description = "Extended Mouse Tab Switcher: any mouse button, next/previous tab, double-click. Turns off the original Mouse Tab Switcher.",
 	tags = {"mouse", "tab", "buttons", "interface", "next", "previous", "cycle"}
 )
-public class MouseTabSwitcherPlusPlugin extends Plugin
+public class MouseTabSwitcherExtendedPlugin extends Plugin
 {
 	@Inject
 	private Client client;
@@ -46,10 +54,19 @@ public class MouseTabSwitcherPlusPlugin extends Plugin
 	private KeyManager keyManager;
 
 	@Inject
-	private MouseTabSwitcherPlusConfig config;
+	private MouseTabSwitcherExtendedConfig config;
 
 	@Inject
 	private ScheduledExecutorService executor;
+
+	@Inject
+	private PluginManager pluginManager;
+
+	@Inject
+	private ChatMessageManager chatMessageManager;
+
+	/** The plugin this one extends: https://github.com/JD-Michelena/MouseTabSwitcher */
+	private static final String ORIGINAL_PLUGIN_CLASS = "com.mousetabswitcher.MouseTabSwitcherPlugin";
 
 	private final MouseAdapter mouseListener = new MouseAdapter()
 	{
@@ -144,6 +161,57 @@ public class MouseTabSwitcherPlusPlugin extends Plugin
 		mouseManager.registerMouseListener(0, mouseListener);
 		keyManager.registerKeyListener(nextKeyListener);
 		keyManager.registerKeyListener(previousKeyListener);
+		turnOffOriginal();
+	}
+
+	/**
+	 * Turns off the original Mouse Tab Switcher if it is installed and on, so the two plugins
+	 * don't both react to the same mouse buttons.
+	 */
+	private void turnOffOriginal()
+	{
+		SwingUtilities.invokeLater(() ->
+		{
+			for (Plugin plugin : pluginManager.getPlugins())
+			{
+				if (!isOriginal(plugin)
+					|| (!pluginManager.isPluginEnabled(plugin) && !pluginManager.isPluginActive(plugin)))
+				{
+					continue;
+				}
+
+				try
+				{
+					pluginManager.setPluginEnabled(plugin, false);
+					pluginManager.stopPlugin(plugin);
+					log.debug("Turned off {}", plugin.getName());
+					chatMessageManager.queue(QueuedMessage.builder()
+						.type(ChatMessageType.CONSOLE)
+						.runeLiteFormattedMessage("Mouse Tab Switcher Extended turned off the original Mouse Tab Switcher"
+							+ " so both don't react to your mouse buttons.")
+						.build());
+				}
+				catch (PluginInstantiationException e)
+				{
+					log.warn("Could not turn off {}", plugin.getName(), e);
+				}
+			}
+		});
+	}
+
+	private static boolean isOriginal(Plugin plugin)
+	{
+		return ORIGINAL_PLUGIN_CLASS.equals(plugin.getClass().getName());
+	}
+
+	@Subscribe
+	public void onPluginChanged(PluginChanged event)
+	{
+		// The original was installed or switched on while this plugin is running.
+		if (event.isLoaded() && isOriginal(event.getPlugin()))
+		{
+			turnOffOriginal();
+		}
 	}
 
 	@Override
@@ -382,8 +450,8 @@ public class MouseTabSwitcherPlusPlugin extends Plugin
 	}
 
 	@Provides
-	MouseTabSwitcherPlusConfig provideConfig(ConfigManager configManager)
+	MouseTabSwitcherExtendedConfig provideConfig(ConfigManager configManager)
 	{
-		return configManager.getConfig(MouseTabSwitcherPlusConfig.class);
+		return configManager.getConfig(MouseTabSwitcherExtendedConfig.class);
 	}
 }

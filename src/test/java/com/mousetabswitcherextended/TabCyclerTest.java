@@ -1,4 +1,4 @@
-package com.mousetabswitcherplus;
+package com.mousetabswitcherextended;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

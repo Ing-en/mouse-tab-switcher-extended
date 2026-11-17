@@ -1,4 +1,4 @@
-package com.mousetabswitcherplus;
+package com.mousetabswitcherextended;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -10,9 +10,10 @@ import net.runelite.client.config.Keybind;
 import net.runelite.client.config.Range;
 import net.runelite.client.config.Units;
 
-@ConfigGroup(MouseTabSwitcherPlusConfig.GROUP)
-public interface MouseTabSwitcherPlusConfig extends Config
+@ConfigGroup(MouseTabSwitcherExtendedConfig.GROUP)
+public interface MouseTabSwitcherExtendedConfig extends Config
 {
+	// Kept from the plugin's working name so existing settings carry over.
 	String GROUP = "mousetabswitcherplus";
 
 	@ConfigSection(
