@@ -4,7 +4,8 @@ Switch OSRS interface tabs with your mouse buttons.
 
 > **Original plugin:** [Mouse Tab Switcher by JD_Michelena](https://github.com/JD-Michelena/MouseTabSwitcher)
 > ([Plugin Hub](https://runelite.net/plugin-hub/show/mouse-tab-switcher)). This is an extended version of it.
-> Turning this plugin on turns the original off, so the two never both react to the same button.
+> The two are marked as conflicting, so RuneLite turns the original off when you turn this one on (and the
+> other way round). They never both react to the same button.
 
 ## Credit
 
